@@ -60,13 +60,18 @@ class _MoviesListScreenState extends State<MoviesListScreen> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No se encontraron películas'));
+                  return const Center(
+                      child: Text('No se encontraron películas'));
                 }
 
                 var filteredMovies = snapshot.data!;
-                if (_selectedGenre != null) {
-                  filteredMovies = filteredMovies.where((movie) =>
-                    movie.genres.contains(_selectedGenre)).toList();
+                if (_selectedGenre != null && _selectedGenre != 'Todos') {
+                  final genreId = MovieService.genreIds[_selectedGenre];
+                  if (genreId != null) {
+                    filteredMovies = filteredMovies
+                        .where((movie) => movie.genres.contains(genreId))
+                        .toList();
+                  }
                 }
 
                 return _buildMoviesGrid(filteredMovies);
@@ -97,7 +102,8 @@ class _MoviesListScreenState extends State<MoviesListScreen> {
           hintStyle: TextStyle(color: Colors.grey[400]),
           prefixIcon: Icon(Icons.search, color: theme.primaryColor),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),
         onChanged: (value) => setState(() => _searchQuery = value),
       ),
@@ -109,7 +115,7 @@ class _MoviesListScreenState extends State<MoviesListScreen> {
       future: _movieService.getGenres(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox();
-        
+
         return Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -162,7 +168,7 @@ class _MoviesListScreenState extends State<MoviesListScreen> {
   Widget _buildFilterChip(String label, String? genre) {
     final isSelected = _selectedGenre == genre;
     final theme = Theme.of(context);
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       child: FilterChip(

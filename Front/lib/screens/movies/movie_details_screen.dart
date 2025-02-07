@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/widgets/custom_app_bar.dart';
+import 'package:flutter_app/services/movie_service.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   const MovieDetailsScreen({super.key});
@@ -27,7 +28,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final movie = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final movie =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 600;
 
@@ -68,41 +70,41 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   }
 
   Widget _buildMovieHeader(Map<String, dynamic> movie) {
-  // Generamos un tag único, usando el key si existe, o un timestamp si no
-  final heroTag = 'movie-${movie['key'] ?? DateTime.now().toString()}';
-  
-  return Hero(
-    tag: heroTag,
-    child: Container(
-      constraints: const BoxConstraints(maxHeight: 500),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15),
-        child: Center(
-          child: movie['posterPath'] != null
-              ? Image.network(
-                  movie['posterPath'],
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return _buildPlaceholder();
-                  },
-                )
-              : _buildPlaceholder(),
+    // Generamos un tag único, usando el key si existe, o un timestamp si no
+    final heroTag = 'movie-${movie['key'] ?? DateTime.now().toString()}';
+
+    return Hero(
+      tag: heroTag,
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 500),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15),
+          child: Center(
+            child: movie['posterPath'] != null
+                ? Image.network(
+                    movie['posterPath'],
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return _buildPlaceholder();
+                    },
+                  )
+                : _buildPlaceholder(),
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget _buildPlaceholder() {
-  return Container(
-    height: 400,
-    decoration: BoxDecoration(
-      color: Colors.grey[300],
-      borderRadius: BorderRadius.circular(15),
-    ),
-    child: const Icon(Icons.movie, size: 100, color: Colors.white54),
-  );
-}
+  Widget _buildPlaceholder() {
+    return Container(
+      height: 400,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: const Icon(Icons.movie, size: 100, color: Colors.white54),
+    );
+  }
 
   Widget _buildMovieInfo(Map<String, dynamic> movie) {
     return Column(
@@ -130,14 +132,16 @@ Widget _buildPlaceholder() {
             ),
           ],
         ),
-        if (movie['genres'] != null && (movie['genres'] as List).isNotEmpty) ...[
+        if (movie['genres'] != null &&
+            (movie['genres'] as List).isNotEmpty) ...[
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: (movie['genres'] as List)
-                .map((genre) => Chip(
-                      label: Text(genre.toString()),
+                .map((genreId) => Chip(
+                      label: Text(
+                          MovieService.genreNames[genreId] ?? 'Desconocido'),
                       backgroundColor:
                           Theme.of(context).primaryColor.withOpacity(0.1),
                     ))

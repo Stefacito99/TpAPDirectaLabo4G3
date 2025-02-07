@@ -6,6 +6,30 @@ import '../models/movie_model.dart';
 class MovieService {
   final baseUrl = dotenv.env['RENDER_URL'] ?? 'apigrupo3.onrender.com/api/v1/peliculas';
 
+  static final Map<String, int> genreIds = {
+    'Acción': 28,
+    'Aventura': 12,
+    'Ciencia Ficción': 878,
+    'Crimen': 80,
+    'Drama': 18,
+    'Fantasía': 14,
+    'Historia': 36,
+    'Romance': 10749,
+    'Suspenso': 53
+  };
+
+  static final Map<int, String> genreNames = {
+    28: 'Acción',
+    12: 'Aventura',
+    878: 'Ciencia Ficción',
+    80: 'Crimen',
+    18: 'Drama',
+    14: 'Fantasía',
+    36: 'Historia',
+    10749: 'Romance',
+    53: 'Suspenso'
+  };
+
   Future<List<Movie>> getPopularMovies() async {
     try {
       final uri = Uri.parse('https://$baseUrl');
@@ -46,21 +70,17 @@ class MovieService {
 
   Future<List<String>> getGenres() async {
     try {
-      final uri = Uri.https(baseUrl, '/generos');
-      final response = await http.get(uri);
+      final uri = Uri.parse('https://$baseUrl/generos');
+      final response = await http.get(uri, headers: {
+        'Access-Control-Allow-Origin': '*',
+      });
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        if (jsonResponse['data'] != null) {
-          return (jsonResponse['data'] as List)
-              .map((genre) => genre['name'].toString())
-              .toList();
-        }
-        throw Exception('Formato de datos inválido');
+        return ['Todos', ...genreIds.keys];
       }
       throw Exception('Error al obtener géneros');
-    } catch (e) {
-      throw Exception('Error de conexión: $e');
+    } catch (e) {      
+      return ['Todos', ...genreIds.keys];
     }
   }
 }

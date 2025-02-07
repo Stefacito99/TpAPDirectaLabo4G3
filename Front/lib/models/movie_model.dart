@@ -4,7 +4,7 @@ class Movie {
   final String releaseDate;
   final String overview;
   final double voteAverage;
-  final List<String> genres;
+  final List<int> genres;
   final String? posterPath; 
 
   Movie({
@@ -24,7 +24,7 @@ class Movie {
     overview: json["overview"] ?? '',
     voteAverage: json["voteAverage"]?.toDouble() ?? 0.0,
     genres: json["genres"] != null 
-        ? List<String>.from(json["genres"]) 
+        ? List<int>.from(json["genres"]) 
         : [],
     posterPath: json["posterPath"],
   );
