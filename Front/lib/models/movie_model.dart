@@ -4,8 +4,8 @@ class Movie {
   final String releaseDate;
   final String overview;
   final double voteAverage;
+  final String? posterPath;
   final List<String> genres;
-  final String? posterPath; // Agregar este campo
 
   Movie({
     required this.key,
@@ -13,8 +13,8 @@ class Movie {
     required this.releaseDate,
     required this.overview,
     required this.voteAverage,
+    this.posterPath,
     this.genres = const [],
-    this.posterPath, // Agregar aquí
   });
 
   factory Movie.fromJson(Map<String, dynamic> json) => Movie(
@@ -23,10 +23,8 @@ class Movie {
     releaseDate: json["releaseDate"] ?? '',
     overview: json["overview"] ?? '',
     voteAverage: json["voteAverage"]?.toDouble() ?? 0.0,
-    genres: json["genres"] != null 
-        ? List<String>.from(json["genres"]) 
-        : [],
     posterPath: json["posterPath"],
+    genres: List<String>.from(json["genres"] ?? []),
   );
 
   Map<String, dynamic> toJson() => {
@@ -35,7 +33,7 @@ class Movie {
     "releaseDate": releaseDate,
     "overview": overview,
     "voteAverage": voteAverage,
-    "genres": genres,
     "posterPath": posterPath,
+    "genres": genres,
   };
 }
