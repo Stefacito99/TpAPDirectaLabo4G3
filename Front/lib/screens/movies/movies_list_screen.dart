@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/widgets/custom_app_bar.dart';
 import 'package:flutter_app/widgets/movies/movie_card.dart';
-import 'package:flutter_app/mocks/movies_mock.dart';  
+import 'package:flutter_app/services/movie_service.dart';
+import 'package:flutter_app/models/movie_model.dart';
 
 class MoviesListScreen extends StatefulWidget {
   const MoviesListScreen({super.key});
@@ -11,28 +12,13 @@ class MoviesListScreen extends StatefulWidget {
 }
 
 class _MoviesListScreenState extends State<MoviesListScreen> {
+  final MovieService _movieService = MovieService();
   String _searchQuery = '';
   String? _selectedGenre;
-
-  List<String> _getAllGenres() {
-    Set<String> genres = {};
-    for (var movie in moviesMock) {  
-      genres.addAll((movie['genres'] as List<String>));
-    }
-    return genres.toList()..sort();
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    var filteredMovies = moviesMock.where((movie) {  
-      final titleMatches = movie['title'].toString().toLowerCase()
-          .contains(_searchQuery.toLowerCase());
-      final genreMatches = _selectedGenre == null || 
-          (movie['genres'] as List<String>).contains(_selectedGenre);
-      return titleMatches && genreMatches;
-    }).toList();
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -53,83 +39,124 @@ class _MoviesListScreenState extends State<MoviesListScreen> {
             ),
             child: Column(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Buscar películas',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      prefixIcon: Icon(Icons.search, color: theme.primaryColor),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                    ),
-                    onChanged: (value) => setState(() => _searchQuery = value),
-                  ),
-                ),
+                _buildSearchBar(theme),
                 const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.start,
-                  children: [
-                    _buildFilterChip('Todos', null),
-                    ..._getAllGenres().map((genre) => _buildFilterChip(genre, genre)),
-                  ],
-                ),
+                _buildGenreFilters(),
               ],
             ),
           ),
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                int crossAxisCount;
-                if (constraints.maxWidth < 450) {
-                  crossAxisCount = 1;
-                } else if (constraints.maxWidth < 800) {
-                  crossAxisCount = 2;
-                } else if (constraints.maxWidth < 1100) {
-                  crossAxisCount = 3;
-                } else {
-                  crossAxisCount = 4;
+            child: FutureBuilder<List<Movie>>(
+              future: _searchQuery.isEmpty
+                  ? _movieService.getPopularMovies()
+                  : _movieService.searchMovies(_searchQuery),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
 
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: filteredMovies.length,
-                  itemBuilder: (context, index) {
-                    final movie = filteredMovies[index];
-                    return MovieCard(
-                      movie: movie,
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        'movie_details',
-                        arguments: movie,
-                      ),
-                    );
-                  },
-                );
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No se encontraron películas'));
+                }
+
+                var filteredMovies = snapshot.data!;
+                if (_selectedGenre != null) {
+                  filteredMovies = filteredMovies.where((movie) =>
+                    movie.genres.contains(_selectedGenre)).toList();
+                }
+
+                return _buildMoviesGrid(filteredMovies);
               },
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildSearchBar(ThemeData theme) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Buscar películas',
+          hintStyle: TextStyle(color: Colors.grey[400]),
+          prefixIcon: Icon(Icons.search, color: theme.primaryColor),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        ),
+        onChanged: (value) => setState(() => _searchQuery = value),
+      ),
+    );
+  }
+
+  Widget _buildGenreFilters() {
+    return FutureBuilder<List<String>>(
+      future: _movieService.getGenres(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox();
+        
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.start,
+          children: [
+            _buildFilterChip('Todos', null),
+            ...snapshot.data!.map((genre) => _buildFilterChip(genre, genre)),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMoviesGrid(List<Movie> movies) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.7,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: movies.length,
+          itemBuilder: (context, index) {
+            return MovieCard(
+              movie: movies[index].toJson(),
+              onTap: () => Navigator.pushNamed(
+                context,
+                'movie_details',
+                arguments: movies[index].toJson(),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  int _calculateCrossAxisCount(double width) {
+    if (width < 450) return 1;
+    if (width < 800) return 2;
+    if (width < 1100) return 3;
+    return 4;
   }
 
   Widget _buildFilterChip(String label, String? genre) {

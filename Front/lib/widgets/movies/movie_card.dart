@@ -34,9 +34,9 @@ class MovieCard extends StatelessWidget {
                     fit: StackFit.expand,
                     children: [
                       Hero(
-                        tag: 'movie-${movie['id']}',
-                        child: Image.asset(
-                          movie['imageAsset'],
+                        tag: 'movie-${movie['key'] ?? DateTime.now().toString()}',
+                        child: Image.network(
+                          movie['posterPath'] ?? '',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
@@ -71,7 +71,7 @@ class MovieCard extends StatelessWidget {
                               ),
                               SizedBox(width: cardWidth * 0.01),
                               Text(
-                                movie['rating'].toString(),
+                                movie['voteAverage']?.toStringAsFixed(1) ?? 'N/A',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: cardWidth * 0.04,
@@ -91,7 +91,7 @@ class MovieCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        movie['title'],
+                        movie['title'] ?? 'Sin título',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -102,7 +102,7 @@ class MovieCard extends StatelessWidget {
                       ),
                       SizedBox(height: cardWidth * 0.02),
                       Text(
-                        movie['releaseDate'],
+                        movie['releaseDate'] ?? 'Fecha desconocida',
                         style: TextStyle(
                           fontSize: subtitleSize,
                           color: Colors.grey[600],

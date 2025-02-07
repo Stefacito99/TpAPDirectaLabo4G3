@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
 export "FLUTTER_ROOT=C:\ExtensionesVisualStudioCode\Flutter\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\Laboratorio de computación 4 proyecto\TP2Flutter-Grupo3\tp2flutter_grupo3"
+export "FLUTTER_APPLICATION_PATH=C:\Laboratorio de computación 4 proyecto\TpAPDirectaLabo4G3\Front"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

@@ -27,13 +27,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final movie =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final movie = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final size = MediaQuery.of(context).size;
     final isSmallScreen = size.width < 600;
 
     return Scaffold(
-      appBar: CustomAppBar(title: movie['title']),
+      appBar: CustomAppBar(title: movie['title'] ?? ''),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -69,40 +68,48 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   }
 
   Widget _buildMovieHeader(Map<String, dynamic> movie) {
-    return Hero(
-      tag: 'movie-${movie['id']}',
-      child: Container(
-        constraints: const BoxConstraints(maxHeight: 500),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: Center(
-            child: Image.asset(
-              movie['imageAsset'],
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 400,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child:
-                      const Icon(Icons.movie, size: 100, color: Colors.white54),
-                );
-              },
-            ),
-          ),
+  // Generamos un tag único, usando el key si existe, o un timestamp si no
+  final heroTag = 'movie-${movie['key'] ?? DateTime.now().toString()}';
+  
+  return Hero(
+    tag: heroTag,
+    child: Container(
+      constraints: const BoxConstraints(maxHeight: 500),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Center(
+          child: movie['posterPath'] != null
+              ? Image.network(
+                  movie['posterPath'],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return _buildPlaceholder();
+                  },
+                )
+              : _buildPlaceholder(),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+Widget _buildPlaceholder() {
+  return Container(
+    height: 400,
+    decoration: BoxDecoration(
+      color: Colors.grey[300],
+      borderRadius: BorderRadius.circular(15),
+    ),
+    child: const Icon(Icons.movie, size: 100, color: Colors.white54),
+  );
+}
 
   Widget _buildMovieInfo(Map<String, dynamic> movie) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          movie['title'],
+          movie['title'] ?? '',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -113,28 +120,30 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             Icon(Icons.star, color: Colors.amber[600], size: 20),
             const SizedBox(width: 4),
             Text(
-              '${movie['rating']}',
+              movie['voteAverage']?.toString() ?? '0.0',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(width: 16),
             Text(
-              'Año: ${movie['releaseDate']}',
+              'Año: ${movie['releaseDate'] ?? 'No disponible'}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: (movie['genres'] as List<String>)
-              .map((genre) => Chip(
-                    label: Text(genre),
-                    backgroundColor:
-                        Theme.of(context).primaryColor.withOpacity(0.1),
-                  ))
-              .toList(),
-        ),
+        if (movie['genres'] != null && (movie['genres'] as List).isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: (movie['genres'] as List)
+                .map((genre) => Chip(
+                      label: Text(genre.toString()),
+                      backgroundColor:
+                          Theme.of(context).primaryColor.withOpacity(0.1),
+                    ))
+                .toList(),
+          ),
+        ],
         const SizedBox(height: 24),
         Text(
           'Sinopsis',
@@ -142,7 +151,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          movie['synopsis'],
+          movie['overview'] ?? 'No hay sinopsis disponible',
           style: Theme.of(context).textTheme.bodyLarge,
         ),
       ],
