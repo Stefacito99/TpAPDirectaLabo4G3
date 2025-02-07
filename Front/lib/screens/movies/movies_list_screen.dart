@@ -66,8 +66,7 @@ class _MoviesListScreenState extends State<MoviesListScreen> {
                 var filteredMovies = snapshot.data!;
                 if (_selectedGenre != null) {
                   filteredMovies = filteredMovies.where((movie) =>
-                    movie.genres.contains(_selectedGenre)
-                  ).toList();
+                    movie.genres.contains(_selectedGenre)).toList();
                 }
 
                 return _buildMoviesGrid(filteredMovies);
@@ -109,17 +108,7 @@ class _MoviesListScreenState extends State<MoviesListScreen> {
     return FutureBuilder<List<String>>(
       future: _movieService.getGenres(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Error cargando géneros: ${snapshot.error}'));
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox(); 
-        }
+        if (!snapshot.hasData) return const SizedBox();
         
         return Wrap(
           spacing: 8,
