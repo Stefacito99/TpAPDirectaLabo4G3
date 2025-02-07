@@ -1,28 +1,25 @@
-//Pantalla lista general de actores (50 registros). Carla
 import 'package:flutter/material.dart';
 import '../../widgets/actors_widgets/custom_list_tile.dart';
 import '../../widgets/custom_app_bar.dart';
-import '../../mocks/actors_mock.dart';
-import '../actors/actor_details_screen.dart';
-
+import '../../models/actor_model.dart';
+import '../../services/actor_service.dart';
 
 class ActorsListScreen extends StatefulWidget {
   const ActorsListScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _ActorsListScreenState createState() => _ActorsListScreenState();
+  State<ActorsListScreen> createState() => _ActorsListScreenState();
 }
 
-//Decidí mostrar pocos registros e ir cargando más a medida que se scrollea hacia abajo
-
 class _ActorsListScreenState extends State<ActorsListScreen> {
-  List<dynamic> actors = [];
-  int currentIndex = 0;
+  List<Actor> actors = [];
+  List<Actor> filteredActors = [];
+  int currentPage = 1;
   final int pageSize = 10;
   final TextEditingController _searchController = TextEditingController();
-  String searchQuery = '';
   bool hasMoreActors = true;
+  bool isLoading = false;
+  final ActorService _actorService = ActorService();
 
   @override
   void initState() {
@@ -30,21 +27,82 @@ class _ActorsListScreenState extends State<ActorsListScreen> {
     _loadMoreActors();
   }
 
-  void _loadMoreActors() {
+  Future<void> _loadMoreActors() async {
+    if (isLoading) return;
+
     setState(() {
-      List<dynamic> filteredActors = actorsMocks
-          .where((actor) =>
-              actor['name'].toLowerCase().contains(searchQuery.toLowerCase()) ||
-              actor['id'].toString().contains(searchQuery))
-          .toList();
-
-      actors = filteredActors.sublist(0, (currentIndex + pageSize) > filteredActors.length
-          ? filteredActors.length
-          : currentIndex + pageSize);
-
-      // Para verificar si hay más acotres o ya se cargaron todos 
-      hasMoreActors = actors.length < filteredActors.length;
+      isLoading = true;
     });
+
+    try {
+      final newActors = await _actorService.getPopularActors(
+        page: currentPage,
+        limit: pageSize,
+      );
+      
+      if (!mounted) return;
+      
+      setState(() {
+        actors.addAll(newActors);
+        filteredActors = List.from(actors);
+        hasMoreActors = newActors.length == pageSize;
+        currentPage++;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cargar más actores: $e')),
+      );
+
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _filterActors(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredActors = List.from(actors);
+      } else {
+        filteredActors = actors.where((actor) {
+          return actor.name.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+      }
+    });
+  }
+
+  Future<void> _searchActors(String query) async {
+    if (isLoading) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final searchResults = await _actorService.searchActors(query);
+      
+      if (!mounted) return;
+      
+      setState(() {
+        actors = searchResults;
+        filteredActors = List.from(actors);
+        hasMoreActors = false;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error en la búsqueda: $e')),
+      );
+
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -55,81 +113,85 @@ class _ActorsListScreenState extends State<ActorsListScreen> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 8),  
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0 , vertical: 8.0),
+            padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: "Escribe nombre o ID del actor para buscar",
-                suffixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: "Buscar actor por nombre",
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        _filterActors('');
+                      },
+                    )
+                  : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                  currentIndex = 0; // Reinicia la búsqueda
-                  _loadMoreActors();
-                });
+              onChanged: _filterActors,
+              onSubmitted: (value) {
+                if (value.isNotEmpty) {
+                  _searchActors(value);
+                }
               },
             ),
           ),
           Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (scrollInfo) {
-                if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-                  if (actors.length < actorsMocks.length && hasMoreActors) {
-                    currentIndex += 5;
-                    _loadMoreActors();
-                  }
-                }
-                return false;
-              },
-              child: ListView.builder(
-                physics: const BouncingScrollPhysics(),  // Efecto de rebote al llegar al final de la lista. No pude probarlo porque en el navegador no funciona pero en android sí debería verse correctamente. 
-                itemCount: actors.isEmpty
-                    ? 1  
-                    : actors.length + (hasMoreActors ? 0 : 1), 
-                itemBuilder: (context, index) {
-                  if (actors.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text('No coincidences')),
-                    );
-                  }
+            child: filteredActors.isEmpty
+              ? Center(
+                  child: isLoading 
+                    ? const CircularProgressIndicator() 
+                    : const Text('No se encontraron actores')
+                )
+              : NotificationListener<ScrollNotification>(
+                  onNotification: (scrollInfo) {
+                    if (scrollInfo.metrics.pixels ==
+                        scrollInfo.metrics.maxScrollExtent) {
+                      if (hasMoreActors && !isLoading) {
+                        _loadMoreActors();
+                      }
+                    }
+                    return false;
+                  },
+                  child: ListView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: filteredActors.length + (hasMoreActors ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == filteredActors.length) {
+                        return const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
 
-                  // Si no hay más actores para cargar, decidí mostrar el mensaje que avisa que es el fin de la lista.
-                  if (!hasMoreActors && index == actors.length) {
-                    return const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text(' - Fin de la lista -')),
-                    );
-                  }
-
-                  return Column(
-                    children: [
-                      CustomListTile(
-                        actor: actors[index],
-                        onTap: () {
-                          // Para navegar a la pantalla de detalles del actor al hacerle tap
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ActorDetailsScreen(actor: actors[index]),
-                            ),
-                          );
-                        },
-                      ),
-                      const Divider(
-                        color: Color.fromARGB(255, 117, 114, 114),
-                        thickness: 0.7,
-                        indent: 15,
-                        endIndent: 15,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+                      return Column(
+                        children: [
+                          CustomListTile(
+                            actor: filteredActors[index].toJson(),
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                'actor_details',
+                                arguments: filteredActors[index],
+                              );
+                            },
+                          ),
+                          const Divider(
+                            color: Color.fromARGB(255, 117, 114, 114),
+                            thickness: 0.7,
+                            indent: 15,
+                            endIndent: 15,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
           ),
         ],
       ),

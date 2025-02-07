@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
-
+import '../../models/actor_model.dart';
 
 class ActorDetailsScreen extends StatefulWidget {
-  final Map<String, dynamic> actor;
-
-  const ActorDetailsScreen({super.key, required this.actor});
+  const ActorDetailsScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _ActorDetailsScreenState createState() => _ActorDetailsScreenState();
+  State<ActorDetailsScreen> createState() => _ActorDetailsScreenState();
 }
 
 class _ActorDetailsScreenState extends State<ActorDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isFavorite = false;
   late TextEditingController _commentController;
+  late Actor actor;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    actor = ModalRoute.of(context)!.settings.arguments as Actor;
+  }
 
   @override
   void initState() {
@@ -36,7 +40,7 @@ class _ActorDetailsScreenState extends State<ActorDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.actor['name'],
+          actor.name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -85,131 +89,97 @@ class _ActorDetailsScreenState extends State<ActorDetailsScreen> {
       ],
     );
   }
-  
-Widget _buildActorHeader(BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final scaffoldBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
 
-  return Hero(
-    tag: 'actor-${widget.actor['id']}',
-    child: Center(  
-      child: Container(
-        width: screenWidth * 0.8,  
-        height: screenWidth * 0.8,  
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: scaffoldBackgroundColor, 
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: FadeInImage.assetNetwork(
-            placeholder: 'assets/actors_assets/loading.gif',  
-            image: widget.actor['profileImage'], 
-            fit: BoxFit.cover,
-            fadeInDuration: const Duration(seconds: 2),  
-            fadeOutDuration: const Duration(milliseconds: 500),
-            imageErrorBuilder: (context, error, stackTrace) {
-              return const Icon(Icons.person, size: 100, color: Colors.white54);  // Icono de persona en caso de que haya error con la imagen
-            },
+  Widget _buildActorHeader(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final scaffoldBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
+
+    return Hero(
+      tag: 'actor-${actor.id}',
+      child: Center(
+        child: Container(
+          width: screenWidth * 0.8,
+          height: screenWidth * 0.8,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            color: scaffoldBackgroundColor,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: FadeInImage.assetNetwork(
+              placeholder: 'assets/actors_assets/loading.gif',
+              image: actor.profileImage ?? '',
+              fit: BoxFit.cover,
+              fadeInDuration: const Duration(seconds: 2),
+              fadeOutDuration: const Duration(milliseconds: 500),
+              imageErrorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.person, size: 100, color: Colors.white54);
+              },
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildActorInfo(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.actor['name'],
+          actor.name,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 8),
-        
-        // Popularidad del actor
         Row(
           children: [
             Icon(Icons.star, color: Colors.amber[600], size: 20),
             const SizedBox(width: 4),
             Text(
-              'Popularity: ${widget.actor['popularity'].toStringAsFixed(1)}',
+              'Popularity: ${actor.popularity.toStringAsFixed(1)}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
         ),
-        
         const SizedBox(height: 16),
-        
-        // Bio
         Text(
           'Biografía',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
         Text(
-          widget.actor['biography'] ?? 'Biography not available.',
+          actor.biography ?? 'Biography not available.',
           maxLines: 4,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        
         const SizedBox(height: 24),
-        
-       /*
-        if (widget.actor['knownfor'] != null && widget.actor['knownfor'].isNotEmpty)
+        if (actor.knownFor.isNotEmpty)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Popular por trabajar en: ',
+                'Conocido por:',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: screenWidth * 0.3,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: widget.actor['knownfor'].length,
-                  itemBuilder: (context, index) {
-                    final knownForItem = widget.actor['knownfor'][index];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Container(
-                        width: screenWidth * 0.4,
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
-                          child: Text(
-                            knownForItem,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: titleSize * 0.8,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: actor.knownFor.map<Widget>((item) {
+                  return Chip(
+                    label: Text(item),
+                  );
+                }).toList(),
               ),
             ],
-          ),*/
+          ),
       ],
     );
   }
 
-//Opinion del usuario
   Widget _buildReviewForm() {
     return Form(
       key: _formKey,
@@ -240,11 +210,9 @@ Widget _buildActorHeader(BuildContext context) {
           const SizedBox(height: 16),
           SwitchListTile(
             title: const Text('Agregar a favoritos'),
-            subtitle: Text(
-              _isFavorite 
+            subtitle: Text(_isFavorite
                 ? 'Ya es uno de tus actores favoritos'
-                : 'Añadir este actor a mis favoritos'
-            ),
+                : 'Añadir este actor a mis favoritos'),
             value: _isFavorite,
             onChanged: (bool value) {
               setState(() {

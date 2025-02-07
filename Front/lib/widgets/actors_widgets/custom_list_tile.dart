@@ -1,26 +1,40 @@
-//Widget list_tile personalizado para la lista de actores. Carla 
 import 'package:flutter/material.dart';
 
 class CustomListTile extends StatelessWidget {
-  final Map<String, dynamic> actor; // mapa como parámetro
+  final Map<String, dynamic> actor;
   final VoidCallback onTap;
 
   const CustomListTile({
     super.key,
     required this.actor,
     required this.onTap,
-    });
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Add null and type checks
+    final name = actor['name'] ?? 'Unknown Actor';
+    final knownFor = actor['knownFor'] is List 
+        ? (actor['knownFor'] as List).join(', ') 
+        : 'No known works';
+    final profileImage = actor['profileImage'];
+
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      title: Text(actor['name'], style: const TextStyle(fontSize: 20), ), 
-      subtitle: Text(actor['knownfor'].join(', ')), 
-      leading: actor['profileImage'] != null
-          ? Image.network(actor['profileImage']) // Muestra la imagen del actor si existe
-          : const Icon(Icons.person), // Si no hay imagen, muestra un ícono de "persona" por defecto
+      title: Text(name, style: const TextStyle(fontSize: 20)), 
+      subtitle: Text(knownFor), 
+      leading: profileImage != null
+          ? Image.network(
+              profileImage, 
+              width: 50, 
+              height: 50, 
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.person);
+              },
+            )
+          : const Icon(Icons.person),
     );
   }
 }

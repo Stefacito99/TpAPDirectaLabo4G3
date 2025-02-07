@@ -31,10 +31,11 @@ class MyApp extends StatelessWidget {
             routes: {
               'home': (context) => const HomeScreen(),
               'profile': (context) => const ProfileScreen(),
-              'actors': (context) =>  const ActorsListScreen(),//Carla
-              'series': (context) =>  const SeriesScreen(),//Stefano
-              'movies': (context) => const MoviesListScreen(),//Nicolás
-              'movie_details': (context) => const MovieDetailsScreen()//Nicolás
+              'actors': (context) => const ActorsListScreen(),
+              'actor_details': (context) => const ActorDetailsScreen(),
+              'series': (context) => const SeriesScreen(),
+              'movies': (context) => const MoviesListScreen(),
+              'movie_details': (context) => const MovieDetailsScreen(),
             },
           );
         },
