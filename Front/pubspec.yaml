@@ -67,7 +67,6 @@ flutter:
     - assets/images/fondo_cine.jpg
     - assets/images/menu.jpg
     - assets/images/avatar.png
-    - assets/images/movies/
     - assets/actors_assets/avatars/
     - assets/actors_assets/loading.gif
     - assets/images/series_images/series1.jpg

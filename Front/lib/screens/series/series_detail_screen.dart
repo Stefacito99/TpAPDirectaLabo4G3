@@ -29,7 +29,7 @@ class SeriesDetailScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(imagePath, fit: BoxFit.cover),
+                      Image.network(imagePath, fit: BoxFit.cover),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
@@ -55,7 +55,7 @@ class SeriesDetailScreen extends StatelessWidget {
               height: 300,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage(imagePath),
+                  image: NetworkImage(imagePath),
                   fit: BoxFit.cover,
                 ),
               ),
