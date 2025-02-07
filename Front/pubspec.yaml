@@ -75,7 +75,7 @@ flutter:
     - assets/images/series_images/series3.jpg
     - assets/images/series_images/series4.jpg
     - assets/images/series_images/series5.jpg
-    - assets/.env
+    - .env
 
   
   

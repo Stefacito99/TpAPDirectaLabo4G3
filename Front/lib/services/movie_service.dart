@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/movie_model.dart';
 
 class MovieService {
-  final baseUrl = dotenv.env['RENDER_URL'] ?? 'apigrupo3.onrender.com/api/v1/peliculas';
+  final baseUrl = dotenv.env['RENDER_URL'];
 
   static final Map<String, int> genreIds = {
     'Acción': 28,
@@ -32,10 +32,8 @@ class MovieService {
 
   Future<List<Movie>> getPopularMovies() async {
     try {
-      final uri = Uri.parse('https://$baseUrl');
-      final response = await http.get(uri, headers: {
-        'Access-Control-Allow-Origin': '*',
-      });
+      final uri = Uri.parse('https://$baseUrl/peliculas');
+      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -51,10 +49,8 @@ class MovieService {
 
   Future<List<Movie>> searchMovies(String query) async {
     try {
-      final uri = Uri.parse('https://$baseUrl/buscar?query=$query');
-      final response = await http.get(uri, headers: {
-        'Access-Control-Allow-Origin': '*',
-      });
+      final uri = Uri.parse('https://$baseUrl/peliculas/buscar?query=$query');
+      final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -69,18 +65,6 @@ class MovieService {
   }
 
   Future<List<String>> getGenres() async {
-    try {
-      final uri = Uri.parse('https://$baseUrl/generos');
-      final response = await http.get(uri, headers: {
-        'Access-Control-Allow-Origin': '*',
-      });
-
-      if (response.statusCode == 200) {
-        return ['Todos', ...genreIds.keys];
-      }
-      throw Exception('Error al obtener géneros');
-    } catch (e) {      
-      return ['Todos', ...genreIds.keys];
-    }
+    return genreIds.keys.toList();
   }
 }
