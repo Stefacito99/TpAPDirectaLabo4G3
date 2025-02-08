@@ -1,29 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/screens/series/series_detail_screen.dart';
+import '../../models/series.dart';
 
 class RecommendedSeriesSwiper extends StatelessWidget {
-  final List<String> imagePaths = [
-    'assets/images/series_images/series1.jpg',
-    'assets/images/series_images/series2.jpg',
-    'assets/images/series_images/series3.jpg',
-    'assets/images/series_images/series4.jpg'
-  ];
+  final List<Series> series;
 
-  final List<String> titles = [
-    'Stranger Things',
-    'The Big Bang Theory',
-    'Friends',
-    'Breaking Bad'
-  ];
-
-  final List<String> descriptions = [
-    'En un pequeño pueblo en los años 80, un grupo de amigos descubre secretos sobrenaturales cuando un niño desaparece, una niña con poderes aparece, y enfrentan criaturas de otra dimensión conocida como "el Upside Down',
-    'Un grupo de científicos brillantes pero socialmente torpes lidian con relaciones, amistades y situaciones hilarantes, mientras navegan su vida diaria con referencias a la cultura pop y la ciencia.',
-    'Seis amigos inseparables en Nueva York comparten su día a día lleno de amor, risas, problemas laborales y momentos inolvidables, mientras crecen juntos y viven situaciones icónicas en Central Park.',
-    'Walter White, un profesor de química con cáncer terminal, se asocia con un exalumno para fabricar metanfetaminas, entrando en un oscuro mundo criminal mientras lucha por proteger a su familia.'
-  ];
-
-  RecommendedSeriesSwiper({super.key});
+  const RecommendedSeriesSwiper({super.key, required this.series});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +13,7 @@ class RecommendedSeriesSwiper extends StatelessWidget {
       height: 250,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: imagePaths.length,
+        itemCount: series.length,
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
@@ -39,9 +21,9 @@ class RecommendedSeriesSwiper extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => SeriesDetailScreen(
-                    imagePath: imagePaths[index],
-                    title: titles[index],
-                    description: descriptions[index],
+                    imagePath: series[index].imageUrl,
+                    title: series[index].name,
+                    description: series[index].summary,
                   ),
                 ),
               );
@@ -49,7 +31,12 @@ class RecommendedSeriesSwiper extends StatelessWidget {
             child: Card(
               elevation: 5,
               margin: const EdgeInsets.symmetric(horizontal: 10),
-              child: Image.asset(imagePaths[index]),
+              child: Image.network(
+                series[index].imageUrl,
+                fit: BoxFit.cover,
+                width: 150,
+                height: 250,
+              ),
             ),
           );
         },

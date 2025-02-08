@@ -17,7 +17,7 @@ class SeriesAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
-          Navigator.pushReplacementNamed(context, 'home');  // Vuelve a la pantalla principal
+          Navigator.pushReplacementNamed(context, 'home'); 
         },
       ),
       actions: [
