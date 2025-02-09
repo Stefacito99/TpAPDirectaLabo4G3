@@ -88,7 +88,7 @@ Pero fue diseñado de esta forma en caso de que incorporemos persistencia de dat
 - **Flutter**: Framework principal
 - **Dart**: Lenguaje de programación
 - **APIs**: Integración con la API que desarrollamos anteriormente 
--**HTTP**: para llamadas de red
+- **HTTP**: para llamadas de red
 - **Git y GitHub**: Control de versiones
 
 ## Arquitectura del Proyecto
