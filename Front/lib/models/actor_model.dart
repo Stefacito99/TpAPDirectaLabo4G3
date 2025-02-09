@@ -1,4 +1,4 @@
-class Actor {
+  class Actor {
   final int id;
   final String name;
   final List<String> knownFor;

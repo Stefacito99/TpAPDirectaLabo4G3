@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/actor_model.dart';
 
 class ActorService {
-  final baseUrl = dotenv.env['RENDER_URL'];
+  final String baseUrl = dotenv.env['RENDER_URL']!;
 
   Future<List<Actor>> getPopularActors({int page = 1, int limit = 50}) async {
     try {
@@ -23,17 +23,15 @@ class ActorService {
     }
   }
 
-  Future<List<Actor>> searchActors(String query) async {
+  Future<List<Actor>> searchActors(String query, {int page = 1}) async {
     try {
-      // Codificar la consulta para manejar espacios y caracteres especiales
       final encodedQuery = Uri.encodeComponent(query);
-      final uri = Uri.parse('https://$baseUrl/actores?nombre=$encodedQuery');
+      final uri = Uri.parse('https://$baseUrl/actores/name?nombre=$encodedQuery&page=$page');
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
         
-        // Verificar si hay datos
         if (jsonResponse['data'] == null || (jsonResponse['data'] as List).isEmpty) {
           return [];
         }
@@ -42,7 +40,6 @@ class ActorService {
             .map((actorJson) => Actor.fromJson(actorJson))
             .toList();
       } else if (response.statusCode == 404) {
-        // Manejar específicamente el caso de no encontrado
         return [];
       }
       throw Exception('Error en la búsqueda');

@@ -1,29 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_app/providers/theme_provider.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final List<Widget>? actions;
+  final Widget? leading; 
 
   const CustomAppBar({
-    super.key,
+    Key? key,
     required this.title,
-  });
+    this.actions,
+    this.leading, 
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Obtiene el tema activo desde el ThemeProvider
-    final theme = Provider.of<ThemeProvider>(context).temaActual;
-
     return AppBar(
       title: Text(title),
-      centerTitle: true,
-      leadingWidth: 40,
-      toolbarHeight: 60,
-      backgroundColor: theme.appBarTheme.backgroundColor,
+      actions: actions,
+      leading: leading, 
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(60);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

@@ -34,12 +34,15 @@ LOS TRES MIEMBROS DEL EQUIPO PROBAMOS LA EJECUCIÓN DEL PROTOTIPO MEDIANTE VISUA
 ### 🎭 Sección de Actores (Carla Racciatti)
 
 #### Características Principales
-- Lista de actores populares con carga incremental
+- Lista de actores populares con carga incremental. Cargará más resultados a medida que el usuario constinúe haciendo scroll. 
 - Búsqueda y filtrado de actores por nombre
+  Para buscar se debe escribir el nombre del actor a buscar y luego presionar "enter" en el teclado o el ícono de la lupa en pantalla. 
 - Obtención de detalles completos de cada actor:
   - Foto de perfil
   - Nivel de popularidad
-  - Biografía detallada
+  - Biografía detallada con widget personalizado "expandable text". 
+    Presionar "leer más" para expandir el texto de la biografía y leer la totalidad. 
+    Presionar "ver menos" para contraer el texto nuevamente. 
 - Formulario para que el usuario complete reseñas sobre los actores
 - Switch para marcar actores como favoritos
 (Los datos ingresados en el formulario y el switch no quedan guardados. 

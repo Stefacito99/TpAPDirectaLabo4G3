@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/actor_model.dart';
+import '../../widgets/actors_widgets/expandable_text.dart';
 
 class ActorDetailsScreen extends StatefulWidget {
   const ActorDetailsScreen({super.key});
@@ -138,7 +139,7 @@ class _ActorDetailsScreenState extends State<ActorDetailsScreen> {
             Icon(Icons.star, color: Colors.amber[600], size: 20),
             const SizedBox(width: 4),
             Text(
-              'Popularity: ${actor.popularity.toStringAsFixed(1)}',
+              'Popularidad: ${actor.popularity.toStringAsFixed(1)}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -149,11 +150,9 @@ class _ActorDetailsScreenState extends State<ActorDetailsScreen> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
-        Text(
-          actor.biography ?? 'Biography not available.',
+        ExpandableText(
+          text: actor.biography ?? 'Biografía no disponible.',
           maxLines: 4,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 24),
         if (actor.knownFor.isNotEmpty)
