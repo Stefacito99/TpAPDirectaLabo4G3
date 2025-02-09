@@ -58,12 +58,6 @@ Pero fue diseñado de esta forma en caso de que incorporemos persistencia de dat
 
 ### 🎬 Sección de Películas (Nicolás Clemente)
 
-#### Novedades Recientes
-- **Mejoras en la Experiencia de Búsqueda**:
-  - Búsqueda más precisa y rápida
-  - Filtros de género optimizados
-  - Manejo mejorado de estados de carga
-
 #### Características Principales
 - Grid view responsivo de películas
 - Barra de búsqueda avanzada
@@ -93,7 +87,7 @@ Pero fue diseñado de esta forma en caso de que incorporemos persistencia de dat
 
 ## Arquitectura del Proyecto
 Estructura de Carpetas
-Copylib/
+lib/
 ├── models/         # Definición de modelos de datos
 ├── screens/        # Pantallas de la aplicación
 ├── services/       # Servicios para comunicación con API
@@ -110,19 +104,21 @@ Copylib/
 
 ## Cómo Clonar y Ejecutar el Proyecto
 1. Clona el repositorio:
-   ```bash
+   ```
    git clone https://github.com/Stefacito99/TpAPDirectaLabo4G3
    ```
 2. Accede al directorio:
-   ```bash
+   ```
    cd TPGrupo3
    ```
 3. Instala dependencias:
-   ```bash
+   ```
    flutter pub get
    ```
-4. Ejecuta la aplicación:
-   ```bash
+4. generar archivo .env en la carpeta TpAPDirectaLabo4G3 con el contenido del sample.env
+
+5. Ejecuta la aplicación:
+   ```
    flutter run
    ```
 
