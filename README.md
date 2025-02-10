@@ -109,7 +109,7 @@ lib/
    ```
 2. Accede al directorio:
    ```
-   cd TPGrupo3
+   cd TpAPDirectaLabo4G3
    ```
 3. Instala dependencias:
    ```
