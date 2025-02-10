@@ -48,13 +48,6 @@ LOS TRES MIEMBROS DEL EQUIPO PROBAMOS LA EJECUCIÓN DEL PROTOTIPO MEDIANTE VISUA
 (Los datos ingresados en el formulario y el switch no quedan guardados. 
 Pero fue diseñado de esta forma en caso de que incorporemos persistencia de datos en el futuro)
 
- **Búsqueda Global Mejorada**: 
- - Implementación de búsqueda en toda la API
- - Estrategia híbrida de búsqueda:
-   - Búsquedas cortas filtran localmente
-   - Búsquedas largas realizan búsqueda global
- - Manejo avanzado de estados (carga, error, sin resultados)
-
 
 ### 🎬 Sección de Películas (Nicolás Clemente)
 
