@@ -81,6 +81,7 @@ Pero fue diseñado de esta forma en caso de que incorporemos persistencia de dat
 ## Arquitectura del Proyecto
 Estructura de Carpetas
 lib/
+
 ├── models/         # Definición de modelos de datos
 
 ├── screens/        # Pantallas de la aplicación
