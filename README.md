@@ -82,9 +82,13 @@ Pero fue diseñado de esta forma en caso de que incorporemos persistencia de dat
 Estructura de Carpetas
 lib/
 ├── models/         # Definición de modelos de datos
+
 ├── screens/        # Pantallas de la aplicación
+
 ├── services/       # Servicios para comunicación con API
+
 ├── widgets/        # Widgets reutilizables
+
 └── providers/      # Gestión de estado
 
 
@@ -108,7 +112,7 @@ lib/
    ```
    flutter pub get
    ```
-4. generar archivo .env en la carpeta TpAPDirectaLabo4G3 con el contenido del sample.env
+4. generar archivo .env en la carpeta TpAPDirectaLabo4G3 con el contenido del sample.env (RENDER_URL)
 
 5. Ejecuta la aplicación:
    ```
